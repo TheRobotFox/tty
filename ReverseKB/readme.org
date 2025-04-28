@@ -4,6 +4,7 @@
 - Grouding only PIN 4 turn on lamps
 - 5 -> 4
 - Wired left to right (1->q->a->2->y->2-> ...)
+- Folding ribbon cable 6cm space
 
 8 22
 7 16

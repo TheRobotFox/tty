@@ -53,10 +53,11 @@ public:
   bool init()
   {
     Serial.println("Init I2C Wire");
-    Wire.setSDA(0);
-    Wire.setSCL(1);
-    Wire.begin();
-    Wire.setClock(50000);
+    Wire1.setSDA(26);
+    Wire1.setSCL(27);
+    Wire1.begin();
+    Wire1.setClock(50000);
+
     bool success = true;
     for(auto &t : m_tcas)
       success &= t.begin(OUTPUT);
@@ -75,7 +76,7 @@ public:
 
   uint64_t readPin()
   {
-    uint64_t result = 0;
+    uint64_t result = 0;  
     for(int i=0; i<m_tcas.size(); i++)
       result |= (uint64_t)(m_tcas[i].read16()) << (16*(i));
     return result;
@@ -94,6 +95,7 @@ public:
 
       uint64_t result = readPin() & ~selected & ~( i==5 ? 1<<4 : 0);
       for(auto [a,b] : found) result &= ~(1<<a);
+      Serial.println(i);
 
       if(!result) continue;
 
@@ -115,7 +117,7 @@ public:
   }
 };
 
-TCAS<2> tca({0x20, 0x21}); 
+TCAS<2> tca({TCA9555(0x20, &Wire1), TCA9555(0x21, &Wire1)}); 
 
 void setup() {
 
@@ -126,10 +128,12 @@ void setup() {
 }
 
 void loop() {
-  waitForButton();
+
   auto connected = tca.scan();
   for(auto [a,b] : connected) Serial.printf("(%d,%d) ", a,b);
-  Serial.print('\n');
+  if(connected.size()) Serial.print('\n');
+  delay(300);
+  while(true);
 
   int error = tca.lastError();
   if(error) Serial.println("Error: " + String(error));
